@@ -13,11 +13,18 @@ declare module 'vue' {
     ElCheckboxGroup: typeof import('element-plus/es')['ElCheckboxGroup']
     ElCollapse: typeof import('element-plus/es')['ElCollapse']
     ElCollapseItem: typeof import('element-plus/es')['ElCollapseItem']
+    ElDelete: typeof import('element-plus/es')['ElDelete']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElInput: typeof import('element-plus/es')['ElInput']
     ElOption: typeof import('element-plus/es')['ElOption']
     ElPagination: typeof import('element-plus/es')['ElPagination']
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElText: typeof import('element-plus/es')['ElText']
+    IEpAdd: typeof import('~icons/ep/add')['default']
+    IEpDelete: typeof import('~icons/ep/delete')['default']
+    IEpFolderOpened: typeof import('~icons/ep/folder-opened')['default']
+    IEpPlus: typeof import('~icons/ep/plus')['default']
+    IEpSave: typeof import('~icons/ep/save')['default']
+    IEpSelect: typeof import('~icons/ep/select')['default']
   }
 }
