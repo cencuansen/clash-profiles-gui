@@ -5,7 +5,6 @@ import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
-
 import Icons from 'unplugin-icons/vite'
 import IconsResolver from 'unplugin-icons/resolver'
 
@@ -21,7 +20,6 @@ export default defineConfig({
       },
       renderer: process.env.NODE_ENV === 'test' ? undefined : {}
     }),
-    // ElementPlus({}),
     AutoImport({
       // 导入 vue 中的函数
       imports: ['vue'],

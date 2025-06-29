@@ -40,18 +40,16 @@ function createWindow() {
     }
   })
 
-  win.webContents.openDevTools()
+  // win.webContents.openDevTools()
 
   win.webContents.on('did-finish-load', () => {
     win?.show()
   })
 
-  // win.loadFile(path.join(RENDERER_DIST, 'index.html'))
-
   if (VITE_DEV_SERVER_URL) {
-      win.loadURL(VITE_DEV_SERVER_URL)
+    win.loadURL(VITE_DEV_SERVER_URL)
   } else {
-      win.loadFile(path.join(RENDERER_DIST, 'index.html'))
+    win.loadFile(path.join(RENDERER_DIST, 'index.html'))
   }
 }
 
