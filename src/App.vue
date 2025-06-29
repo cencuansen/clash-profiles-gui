@@ -3,6 +3,7 @@
     <div class="header">
       <el-button size="small" type="primary" @click="loadFile">加载</el-button>
       <el-button size="small" type="primary" @click="saveFile">保存</el-button>
+      <div class="drag-area"></div>
     </div>
 
     <div class="main">
@@ -13,7 +14,7 @@
           <el-text class="proxy-name" truncated>{{ p.name }}</el-text>
           <el-button type="danger" size="small" @click="deleteProxy(p.name, index)">
             <el-icon>
-              <Delete />
+              <Delete/>
             </el-icon>
           </el-button>
         </div>
@@ -32,13 +33,14 @@
               <div class="group-header">
                 <span>{{ g.name }}</span>
                 <div>
-                  <el-select v-model="g.type" size="small" style="width: 80px;" placeholder="选择类型" class="group-type"
-                    @click.stop @change="() => { }">
+                  <el-select v-model="g.type" size="small" style="width: 80px;" placeholder="选择类型"
+                             class="group-type"
+                             @click.stop @change="() => { }">
                     <el-option v-for="gt in groupTypes" :key="gt" :label="gt" :value="gt"></el-option>
                   </el-select>
                   <el-button type="danger" size="small" class="group-delete" @click.stop="deleteGroup(g.name, index)">
                     <el-icon>
-                      <Delete />
+                      <Delete/>
                     </el-icon>
                   </el-button>
                 </div>
@@ -50,8 +52,8 @@
               </div>
             </el-checkbox-group>
             <el-pagination v-model:current-page="groupCurrentPage[g.name]" :page-size="groupPageSize"
-              :total="(proxies?.length || 0) + 1" layout="prev, pager, next" size="small"
-              @current-change="handleGroupPageChange(g.name)"></el-pagination>
+                           :total="(proxies?.length || 0) + 1" layout="prev, pager, next" size="small"
+                           @current-change="handleGroupPageChange(g.name)"></el-pagination>
           </el-collapse-item>
         </el-collapse>
       </div>
@@ -65,10 +67,10 @@
               <div class="rule-header">
                 <span>{{ type }} ({{ rules[type]?.length || 0 }})</span>
                 <el-select v-if="(rules[type]?.length || 0) > 0" v-model="batchGroup[type]" size="small"
-                  placeholder="选择分组" class="batch-group" clearable @click.stop
-                  @change="batchUpdateRuleGroup(type, $event)">
+                           placeholder="选择分组" class="batch-group" clearable @click.stop
+                           @change="batchUpdateRuleGroup(type, $event)">
                   <el-option v-for="group in groups" :key="group.name" :label="group.name"
-                    :value="group.name"></el-option>
+                             :value="group.name"></el-option>
                   <el-option label="DIRECT" value="DIRECT"></el-option>
                 </el-select>
               </div>
@@ -76,28 +78,28 @@
 
             <div class="rule-input">
               <el-input class="input-rule" v-model="newRule[type]" size="small" placeholder="输入" clearable
-                @input="debouncedFilterRules(type)" @keyup.enter="addRule(type)"></el-input>
+                        @input="debouncedFilterRules(type)" @keyup.enter="addRule(type)"></el-input>
               <el-button class="add-rule" type="primary" size="small" @click="addRule(type)">添加</el-button>
             </div>
             <div class="rule-content">
               <div class="rule-row" v-for="(r, index) in paginatedRules[type]" :key="index">
                 <div class="rule-name" v-html="highlightRule(r.rule, newRule[type])"></div>
                 <el-select v-model="r.group" size="small" placeholder="选择分组" class="rule-group"
-                  @change="updateRuleGroup(type, rules[type].indexOf(r.rule), $event)">
+                           @change="updateRuleGroup(type, rules[type].indexOf(r.rule), $event)">
                   <el-option v-for="group in groups" :key="group.name" :label="group.name"
-                    :value="group.name"></el-option>
+                             :value="group.name"></el-option>
                   <el-option label="DIRECT" value="DIRECT"></el-option>
                 </el-select>
                 <el-button type="danger" size="small" @click="deleteRule(type, rules[type].indexOf(r.rule))">
                   <el-icon>
-                    <Delete />
+                    <Delete/>
                   </el-icon>
                 </el-button>
               </div>
             </div>
             <el-pagination v-model:current-page="currentPage[type]" :page-size="pageSize"
-              :total="filteredRules[type].length" layout="prev, pager, next" size="small"
-              @current-change="handlePageChange(type)"></el-pagination>
+                           :total="filteredRules[type].length" layout="prev, pager, next" size="small"
+                           @current-change="handlePageChange(type)"></el-pagination>
           </el-collapse-item>
         </el-collapse>
       </div>
@@ -106,10 +108,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
 import yaml from 'js-yaml';
-import { ipcRenderer } from 'electron';
-import { ElMessage } from 'element-plus';
 
 function debounce(fn, delay) {
   let timer = null;
@@ -123,6 +122,7 @@ function debounce(fn, delay) {
 }
 
 const defaultGroup = '代理';
+const DIRECT = 'DIRECT';
 
 const originalData = reactive({});
 const rules = ref({});
@@ -169,13 +169,11 @@ ruleTypes.forEach((type) => {
 
 // 防抖过滤函数
 const filterRules = (type) => {
-  console.log('rules.value[type]', rules.value[type]);
-
   const query = newRule.value[type].trim().toLowerCase();
   filteredRules.value[type] = query
-    ? rules.value[type].map((rule, index) => ({ rule, group: rules.value[type + '_group'][index] || defaultGroup }))
-      .filter((item) => item.rule.toLowerCase().includes(query))
-    : rules.value[type].map((rule, index) => ({ rule, group: rules.value[type + '_group'][index] || defaultGroup }));
+      ? rules.value[type].map((rule, index) => ({rule, group: rules.value[type + '_group'][index] || defaultGroup}))
+          .filter((item) => item.rule.toLowerCase().includes(query))
+      : rules.value[type].map((rule, index) => ({rule, group: rules.value[type + '_group'][index] || defaultGroup}));
   currentPage.value[type] = 1;
   updatePaginatedRules(type);
 };
@@ -218,8 +216,8 @@ ipcRenderer.on('profile-loaded', (event, content) => {
   groups.value.forEach((g) => {
     groupCurrentPage.value[g.name] = 1;
     updatePaginatedGroupProxies(g.name);
-    if (!g.proxies.includes('DIRECT')) {
-      g.proxies.unshift('DIRECT'); // 确保 DIRECT 在首位
+    if (!g.proxies.includes(DIRECT)) {
+      g.proxies.unshift(DIRECT); // 确保 DIRECT 在首位
     }
   });
   if (groups.value.length > 0) {
@@ -261,7 +259,6 @@ const deleteRule = (type, index) => {
 const updateRuleGroup = (type, index, group) => {
   rules.value[type + '_group'][index] = group;
   if (type === 'MATCH') {
-    // console.log('rules.value', rules.value);
     rules.value['MATCH'] = [group];
   }
   filterRules(type);
@@ -301,7 +298,7 @@ const addGroup = () => {
   const newGroup = {
     name,
     type: 'select',
-    proxies: ['DIRECT', ...proxies.value.map((p) => p.name)], // 默认关联所有 proxy
+    proxies: [DIRECT, ...proxies.value.map((p) => p.name)], // 默认关联所有 proxy
   };
   groups.value.push(newGroup);
   groupCurrentPage.value[name] = 1;
@@ -318,7 +315,7 @@ const deleteGroup = (name, index) => {
   }
   // 将关联该分组的规则设置为 DIRECT
   ruleTypes.forEach((type) => {
-    rules.value[type + '_group'] = rules.value[type + '_group'].map((g) => (g === name ? 'DIRECT' : g));
+    rules.value[type + '_group'] = rules.value[type + '_group'].map((g) => (g === name ? DIRECT : g));
     filterRules(type);
   });
   groups.value.splice(index, 1);
@@ -347,23 +344,17 @@ const deleteProxy = (name, index) => {
 
 const updateGroupProxies = (groupName, selectedProxies) => {
   const group = groups.value.find((g) => g.name === groupName);
-  if (!selectedProxies.includes('DIRECT')) {
-    selectedProxies.unshift('DIRECT'); // 强制保留 DIRECT
+  if (!selectedProxies.includes(DIRECT)) {
+    selectedProxies.unshift(DIRECT); // 强制保留 DIRECT
   }
   group.proxies = selectedProxies;
   updatePaginatedGroupProxies(groupName);
 };
 
 const updatePaginatedGroupProxies = (groupName) => {
-  const allProxies = proxies.value.map((p) => p.name).filter((n) => n !== 'DIRECT');
-  const groupPorxies = groups.value.filter(x => x.name === groupName)[0].proxies.filter(x => x !== 'DIRECT' && !allProxies.includes(x));
-  const mergedProxies = ['DIRECT', ...groupPorxies, ...allProxies];
-
-  console.log('allProxies', allProxies);
-  console.log('groups.value', groups.value);
-  console.log('groupPorxies', groupPorxies);
-  console.log('mergedProxies', mergedProxies);
-
+  const allProxies = proxies.value.map((p) => p.name).filter((n) => n !== DIRECT);
+  const groupProxies = groups.value.filter(x => x.name === groupName)[0].proxies.filter(x => x !== DIRECT && !allProxies.includes(x));
+  const mergedProxies = [DIRECT, ...groupProxies, ...allProxies];
 
   const start = (groupCurrentPage.value[groupName] - 1) * groupPageSize;
   const end = start + groupPageSize;
@@ -379,23 +370,22 @@ const saveFile = () => {
   for (const type of ruleTypes) {
     if (rules.value[type]) {
       const typeRules = rules.value[type]
-        .map((line, index) => {
-          const group = rules.value[type + '_group'][index] || defaultGroup;
-          return type === 'MATCH' ? `${type},${line}` : `${type},${line},${group}`;
-        })
-        .filter((rule) => rule.split(',')[1].trim());
+          .map((line, index) => {
+            const group = rules.value[type + '_group'][index] || defaultGroup;
+            return type === 'MATCH' ? `${type},${line}` : `${type},${line},${group}`;
+          })
+          .filter((rule) => rule.split(',')[1].trim());
       outputRules.push(...typeRules);
     }
   }
 
-  const outputData = { ...originalData.value };
+  const outputData = {...originalData.value};
   outputData.proxies = proxies.value;
   outputData['proxy-groups'] = groups.value;
   outputData.rules = outputRules;
 
   const yamlStr = yaml.dump(outputData);
-  // ipcRenderer.send('save-profile', yamlStr);
-  debounce(ipcRenderer.send, 300)('save-profile', yamlStr);
+  ipcRenderer.send('save-profile', yamlStr);
 };
 
 const highlightRule = (rule, query) => {
@@ -412,12 +402,21 @@ const highlightRule = (rule, query) => {
   flex-direction: column;
   height: 90vh;
   overflow: hidden;
+  user-select: none;
 }
 
 .header {
+  display: flex;
   margin-bottom: 10px;
   flex-shrink: 0;
-  /* 防止 .header 被压缩 */
+}
+
+.drag-area {
+  margin-left: 20px;
+  background-color: #222;
+  user-select: none;
+  app-region: drag;
+  flex-grow: 1
 }
 
 .main {
@@ -499,7 +498,6 @@ const highlightRule = (rule, query) => {
 
 .el-collapse-item__header {
   font-weight: bold;
-  font-family: "Consolas", "Monaco", "Courier New", monospace;
 }
 
 .rule-header {
@@ -518,10 +516,6 @@ const highlightRule = (rule, query) => {
   display: flex;
   gap: 8px;
   padding: 5px 0;
-}
-
-.input-rule input {
-  font-family: "Consolas", "Monaco", "Courier New", monospace;
 }
 
 .add-rule {
@@ -545,36 +539,17 @@ const highlightRule = (rule, query) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-family: "Consolas", "Monaco", "Courier New", monospace;
 }
 
 .rule-group {
   width: 120px;
 }
 
-.rule-row:nth-child(odd) {}
-
-.rule-row:nth-child(even) {}
-
 .highlight {
   color: red;
 }
 
-.empty {}
-
 ::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
-
   display: none;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #dcdcdc;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f5f5f5;
 }
 </style>

@@ -5,6 +5,7 @@
     "module": "ESNext",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
+    "types": ["node", "electron"], // 确保包含 electron 类型
 
     /* Bundler mode */
     "moduleResolution": "bundler",
